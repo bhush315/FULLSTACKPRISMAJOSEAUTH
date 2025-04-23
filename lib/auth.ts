@@ -1,18 +1,18 @@
-import { jwtVerify, SignJWT } from 'jose';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-import { redirect } from 'next/navigation';
+import { jwtVerify, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 
 // Secret key for JWT signing and verification
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'default_secret_replace_in_production'
+  process.env.JWT_SECRET || "default_secret_replace_in_production"
 );
 
 export type SessionUser = {
   id: string;
   email: string;
   fullName: string;
-  role: 'USER' | 'ADMIN';
+  role: "USER" | "ADMIN";
 };
 
 // Create a JWT token
@@ -23,9 +23,9 @@ export async function createToken(user: SessionUser) {
     fullName: user.fullName,
     role: user.role,
   })
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('1d') // 1 day expiration
+    .setExpirationTime("7d") // 7 day expiration
     .sign(JWT_SECRET);
 }
 
@@ -42,10 +42,10 @@ export async function verifyToken(token: string) {
 // Get the current session from cookies
 export async function getSession() {
   const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
-  
+  const token = cookieStore.get("token")?.value;
+
   if (!token) return null;
-  
+
   return await verifyToken(token);
 }
 
@@ -58,39 +58,33 @@ export async function isAuthenticated() {
 // Check if a user is an admin
 export async function isAdmin() {
   const session = await getSession();
-  return session?.role === 'ADMIN';
+  return session?.role === "ADMIN";
 }
 
 // Middleware to protect routes that require authentication
 export async function requireAuth() {
   const isAuthed = await isAuthenticated();
-  
+
   if (!isAuthed) {
-    redirect('/auth/login');
+    redirect("/auth/login");
   }
 }
 
 // Middleware to protect routes that require admin role
 export async function requireAdmin() {
   const session = await getSession();
-  
-  if (!session || session.role !== 'ADMIN') {
-    redirect('/dashboard');
+
+  if (!session || session.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 }
 
 // Helper to create API response for unauthenticated requests
-export function unauthenticatedResponse(message = 'Unauthenticated') {
-  return NextResponse.json(
-    { error: message },
-    { status: 401 }
-  );
+export function unauthenticatedResponse(message = "Unauthenticated") {
+  return NextResponse.json({ error: message }, { status: 401 });
 }
 
 // Helper to create API response for unauthorized requests
-export function unauthorizedResponse(message = 'Unauthorized') {
-  return NextResponse.json(
-    { error: message },
-    { status: 403 }
-  );
+export function unauthorizedResponse(message = "Unauthorized") {
+  return NextResponse.json({ error: message }, { status: 403 });
 }

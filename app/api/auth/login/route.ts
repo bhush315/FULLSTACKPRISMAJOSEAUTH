@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Set token in HTTP-only cookie
-    (await cookies()).set({
+    (
+      await // Set token in HTTP-only cookie
+      cookies()
+    ).set({
       name: "token",
       value: token,
       httpOnly: true,
@@ -61,9 +64,13 @@ export async function POST(request: NextRequest) {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
+    // Return role-specific redirect path
+    const redirectPath = user.role === "ADMIN" ? "/admin" : "/dashboard";
+
     return NextResponse.json({
       message: "Login successful",
       user: userWithoutPassword,
+      redirectPath,
     });
   } catch (error) {
     console.error("Login error:", error);

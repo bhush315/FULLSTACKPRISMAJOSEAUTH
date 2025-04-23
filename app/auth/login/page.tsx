@@ -28,7 +28,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -64,13 +64,16 @@ export default function LoginPage() {
 
       toast({
         title: "Login successful",
-        description: "Redirecting to dashboard...",
+        description: "Redirecting...",
       });
-      
-      router.push("/dashboard");
+
+      // Use the redirectPath from the API response
+      router.push(result.redirectPath);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid email or password");
+      setError(
+        err instanceof Error ? err.message : "Invalid email or password"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +125,9 @@ export default function LoginPage() {
                 })}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -133,7 +138,10 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col items-center">
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/register" className="text-blue-500 hover:text-blue-700">
+            <Link
+              href="/auth/register"
+              className="text-blue-500 hover:text-blue-700"
+            >
               Sign up
             </Link>
           </div>
